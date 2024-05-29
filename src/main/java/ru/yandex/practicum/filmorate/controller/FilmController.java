@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -22,16 +23,7 @@ public class FilmController {
     private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, Month.DECEMBER, 28);
 
     @PostMapping
-    public Film create(@RequestBody Film newFilm) {
-
-        validateFilmName(newFilm);
-        log.debug("Фильм {} прошел валидацию имени", newFilm);
-        validateFilmDescription(newFilm);
-        log.debug("Фильм {} прошел валидацию описания", newFilm);
-        validateFilmReleaseDate(newFilm);
-        log.debug("Фильм {} прошел валидацию даты релиза", newFilm);
-        validateFilmDuration(newFilm);
-        log.debug("Фильм {} прошел валидацию продолжительности", newFilm);
+    public Film create(@Valid @RequestBody Film newFilm) {
 
         newFilm.setId(getNextId());
         log.debug("Фильму {} присвоен id={}", newFilm, newFilm.getId());

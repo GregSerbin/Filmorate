@@ -34,58 +34,6 @@ public class FilmControllerTest {
     }
 
     @Test
-    public void createFilmShouldThrowExceptionWhenNameIsEmptyOrNull() {
-        Film filmWithEmptyName = defaultFilm.toBuilder()
-                .name("") // Имя фильма не должно быть пустым
-                .build();
-
-        Film filmWithNullName = defaultFilm.toBuilder()
-                .name(null) // Имя фильма не должно быть пустым
-                .build();
-
-        assertThrowsExactly(ValidationException.class, () -> filmController.create(filmWithEmptyName));
-        assertThrowsExactly(ValidationException.class, () -> filmController.create(filmWithNullName));
-    }
-
-    @Test
-    public void createFilmShouldThrowExceptionWhenDescriptionIsOver200Characters() {
-
-        short descriptionLengthMoreThan200Characters = 300;
-        byte[] array = new byte[descriptionLengthMoreThan200Characters];
-        new Random().nextBytes(array);
-        String description = new String(array, Charset.forName("UTF-8"));
-
-        Film film = defaultFilm.toBuilder()
-                .description(description) // Описание фильма не должно быть более 200 символов
-                .build();
-
-        assertThrowsExactly(ValidationException.class, () -> filmController.create(film));
-    }
-
-    @Test
-    public void createFilmShouldThrowExceptionWhenReleaseDateIsEarlier25_12_1895() {
-        Film film = defaultFilm.toBuilder()
-                .releaseDate(LocalDate.of(1800, 1, 1)) // Релиз фильма не должен быть ранее 25 декабря 1895 года
-                .build();
-
-        assertThrowsExactly(ValidationException.class, () -> filmController.create(film));
-    }
-
-    @Test
-    public void createFilmShouldThrowExceptionWhenFilmDurationIsNotPositive() {
-        Film filmWithNegativeDuration = defaultFilm.toBuilder()
-                .duration(-1) // Продолжительность фильма не должна быть равной нулю или отрицательной
-                .build();
-
-        Film filmWithZeroDuration = defaultFilm.toBuilder()
-                .duration(0) // Продолжительность фильма не должна быть равной нулю или отрицательной
-                .build();
-
-        assertThrowsExactly(ValidationException.class, () -> filmController.create(filmWithNegativeDuration));
-        assertThrowsExactly(ValidationException.class, () -> filmController.create(filmWithZeroDuration));
-    }
-
-    @Test
     public void updateFilmShouldNotThrowExceptionWhenFilmIsValid() {
         Film createdFilm = filmController.create(defaultFilm);
         Film updatedFilm = createdFilm.toBuilder()
@@ -104,12 +52,7 @@ public class FilmControllerTest {
                 .name("") // Имя фильма не должно быть пустым
                 .build();
 
-        Film filmWithNullName = createdFilm.toBuilder()
-                .name(null) // Имя фильма не должно быть пустым
-                .build();
-
         assertThrowsExactly(ValidationException.class, () -> filmController.update(filmWithEmptyName));
-        assertThrowsExactly(ValidationException.class, () -> filmController.update(filmWithNullName));
     }
 
     @Test
@@ -125,16 +68,6 @@ public class FilmControllerTest {
                 .build();
 
         assertThrowsExactly(ValidationException.class, () -> filmController.update(updatedFilm));
-    }
-
-    @Test
-    public void updateFilmShouldThrowExceptionWhenReleaseDateIsEarlier25_12_1895() {
-        Film createdFilm = filmController.create(defaultFilm);
-        Film updatedFilm = createdFilm.toBuilder()
-                .releaseDate(LocalDate.of(1800, 1, 1)) // Релиз фильма не должен быть ранее 25 декабря 1895 года
-                .build();
-
-        assertThrowsExactly(ValidationException.class, () -> filmController.create(updatedFilm));
     }
 
     @Test

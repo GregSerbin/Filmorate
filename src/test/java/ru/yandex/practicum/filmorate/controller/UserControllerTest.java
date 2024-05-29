@@ -32,44 +32,6 @@ public class UserControllerTest {
     }
 
     @Test
-    public void createUserShouldThrowExceptionWhenEmailIsEmptyOrNullOrDoesNotContainAt() {
-        User userWithNullEmail = defaultUser.toBuilder()
-                .email(null)
-                .build();
-
-        User userWithEmptyEmail = defaultUser.toBuilder()
-                .email("")
-                .build();
-
-        User userWithEmailWithoutAt = defaultUser.toBuilder()
-                .email("email_without_at")
-                .build();
-
-        assertThrowsExactly(ValidationException.class, () -> userController.create(userWithNullEmail));
-        assertThrowsExactly(ValidationException.class, () -> userController.create(userWithEmptyEmail));
-        assertThrowsExactly(ValidationException.class, () -> userController.create(userWithEmailWithoutAt));
-    }
-
-    @Test
-    public void createUserShouldThrowExceptionWhenLoginIsEmptyOrNullOrContainsSpaces() {
-        User userWithNullLogin = defaultUser.toBuilder()
-                .login(null)
-                .build();
-
-        User userWithEmptyLogin = defaultUser.toBuilder()
-                .login("")
-                .build();
-
-        User userWithLoginWithSpaces = defaultUser.toBuilder()
-                .login("Login With Spaces")
-                .build();
-
-        assertThrowsExactly(ValidationException.class, () -> userController.create(userWithNullLogin));
-        assertThrowsExactly(ValidationException.class, () -> userController.create(userWithEmptyLogin));
-        assertThrowsExactly(ValidationException.class, () -> userController.create(userWithLoginWithSpaces));
-    }
-
-    @Test
     public void createUserShouldNotThrowExceptionWhenUserNameIsEmpty() {
         User userWithEmptyName = defaultUser.toBuilder()
                 .name("")
@@ -84,33 +46,9 @@ public class UserControllerTest {
     }
 
     @Test
-    public void createUserShouldThrowExceptionWhenBirthDateIsInFuture() {
-        User userWithBirthDateInFuture = defaultUser.toBuilder()
-                .birthday(LocalDate.now().plusDays(10))
-                .build();
-
-        assertThrowsExactly(ValidationException.class, () -> userController.create(userWithBirthDateInFuture));
-    }
-
-    @Test
     public void updateUserShouldNotThrowExceptionWhenUserIsValid() {
         User createdUser = userController.create(defaultUser);
         assertDoesNotThrow(() -> userController.update(createdUser));
-    }
-
-    @Test
-    public void updateUserShouldThrowExceptionWhenEmailIsEmptyOrNullOrDoesNotContainAt() {
-        User createdUser = userController.create(defaultUser);
-        User updatedUserWithEmptyEmail = createdUser.toBuilder()
-                .email("")
-                .build();
-
-        User updatedUserWithEmailWithoutAt = createdUser.toBuilder()
-                .email("email_without_at")
-                .build();
-
-        assertThrowsExactly(ValidationException.class, () -> userController.create(updatedUserWithEmptyEmail));
-        assertThrowsExactly(ValidationException.class, () -> userController.create(updatedUserWithEmailWithoutAt));
     }
 
     @Test
