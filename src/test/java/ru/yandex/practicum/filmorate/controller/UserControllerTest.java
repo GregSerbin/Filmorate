@@ -37,11 +37,15 @@ public class UserControllerTest {
                 .name("")
                 .build();
 
+        assertDoesNotThrow(() -> userController.create(userWithEmptyName));
+    }
+
+    @Test
+    public void createUserShouldNotThrowExceptionWhenUserNameIsNull() {
         User userWithNullName = defaultUser.toBuilder()
                 .name(null)
                 .build();
 
-        assertDoesNotThrow(() -> userController.create(userWithEmptyName));
         assertDoesNotThrow(() -> userController.create(userWithNullName));
     }
 
@@ -52,18 +56,24 @@ public class UserControllerTest {
     }
 
     @Test
-    public void updatedUserShouldThrowExceptionWhenLoginIsEmptyOrNullOrContainsSpaces() {
+    public void updatedUserShouldThrowExceptionWhenLoginIsEmpty() {
         User createdUser = userController.create(defaultUser);
 
         User updatedUserWithEmptyLogin = createdUser.toBuilder()
                 .login("")
                 .build();
 
+        assertThrowsExactly(ValidationException.class, () -> userController.update(updatedUserWithEmptyLogin));
+    }
+
+    @Test
+    public void updatedUserShouldThrowExceptionWhenLoginContainsSpaces() {
+        User createdUser = userController.create(defaultUser);
+
         User updatedUserWithLoginWithSpaces = createdUser.toBuilder()
                 .login("Login With Spaces")
                 .build();
 
-        assertThrowsExactly(ValidationException.class, () -> userController.update(updatedUserWithEmptyLogin));
         assertThrowsExactly(ValidationException.class, () -> userController.update(updatedUserWithLoginWithSpaces));
     }
 

@@ -71,17 +71,22 @@ public class FilmControllerTest {
     }
 
     @Test
-    public void updateFilmShouldThrowExceptionWhenFilmDurationIsNotPositive() {
+    public void updateFilmShouldThrowExceptionWhenFilmDurationIsNegative() {
         Film createdFilm = filmController.create(defaultFilm);
         Film filmWithNegativeDuration = createdFilm.toBuilder()
                 .duration(-1) // Продолжительность фильма не должна быть равной нулю или отрицательной
                 .build();
 
+        assertThrowsExactly(ValidationException.class, () -> filmController.update(filmWithNegativeDuration));
+    }
+
+    @Test
+    public void updateFilmShouldThrowExceptionWhenFilmDurationIsZero() {
+        Film createdFilm = filmController.create(defaultFilm);
         Film filmWithZeroDuration = createdFilm.toBuilder()
                 .duration(0) // Продолжительность фильма не должна быть равной нулю или отрицательной
                 .build();
 
-        assertThrowsExactly(ValidationException.class, () -> filmController.update(filmWithNegativeDuration));
         assertThrowsExactly(ValidationException.class, () -> filmController.update(filmWithZeroDuration));
     }
 

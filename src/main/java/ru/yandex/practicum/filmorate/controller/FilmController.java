@@ -45,21 +45,29 @@ public class FilmController {
             Film oldFilm = films.get(newFilm.getId());
             log.debug("По id={} найден фильм {}", newFilm.getId(), oldFilm);
 
-            validateFilmName(newFilm);
-            oldFilm.setName(newFilm.getName());
-            log.info("Изменено имя фильма на \"{}\"", oldFilm.getName());
+            if (newFilm.getName() != null) {
+                validateFilmName(newFilm);
+                oldFilm.setName(newFilm.getName());
+                log.info("Изменено имя фильма на \"{}\"", oldFilm.getName());
+            }
 
-            validateFilmDescription(newFilm);
-            oldFilm.setDescription(newFilm.getDescription());
-            log.info("Изменено описание фильма на \"{}\"", oldFilm.getDescription());
+            if (newFilm.getDescription() != null) {
+                validateFilmDescription(newFilm);
+                oldFilm.setDescription(newFilm.getDescription());
+                log.info("Изменено описание фильма на \"{}\"", oldFilm.getDescription());
+            }
 
-            validateFilmReleaseDate(newFilm);
-            oldFilm.setReleaseDate(newFilm.getReleaseDate());
-            log.info("Изменена дата релиза фильма на \"{}\"", oldFilm.getReleaseDate());
+            if (newFilm.getReleaseDate() != null) {
+                validateFilmReleaseDate(newFilm);
+                oldFilm.setReleaseDate(newFilm.getReleaseDate());
+                log.info("Изменена дата релиза фильма на \"{}\"", oldFilm.getReleaseDate());
+            }
 
-            validateFilmDuration(newFilm);
-            oldFilm.setDuration(newFilm.getDuration());
-            log.info("Изменена продолжительность фильма на \"{}\"", oldFilm.getDuration());
+            if (newFilm.getDuration() != null) {
+                validateFilmDuration(newFilm);
+                oldFilm.setDuration(newFilm.getDuration());
+                log.info("Изменена продолжительность фильма на \"{}\"", oldFilm.getDuration());
+            }
 
             return oldFilm;
         }
