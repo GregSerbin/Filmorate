@@ -3,8 +3,8 @@ package ru.yandex.practicum.filmorate.controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.UserDTO;
+import ru.yandex.practicum.filmorate.model.UserUpdateDTO;
 
 import java.time.LocalDate;
 
@@ -13,12 +13,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserControllerTest {
 
     private UserController userController;
-    private User defaultUser;
+    private UserDTO defaultUser;
 
     @BeforeEach
     public void beforeEach() {
         userController = new UserController();
-        defaultUser = User.builder()
+        defaultUser = UserDTO.builder()
                 .email("user_email@example.ru")
                 .login("user_login")
                 .name("User Name")
@@ -33,7 +33,7 @@ public class UserControllerTest {
 
     @Test
     public void createUserShouldNotThrowExceptionWhenUserNameIsEmpty() {
-        User userWithEmptyName = defaultUser.toBuilder()
+        UserDTO userWithEmptyName = defaultUser.toBuilder()
                 .name("")
                 .build();
 
@@ -42,7 +42,7 @@ public class UserControllerTest {
 
     @Test
     public void createUserShouldNotThrowExceptionWhenUserNameIsNull() {
-        User userWithNullName = defaultUser.toBuilder()
+        UserDTO userWithNullName = defaultUser.toBuilder()
                 .name(null)
                 .build();
 
@@ -51,54 +51,32 @@ public class UserControllerTest {
 
     @Test
     public void updateUserShouldNotThrowExceptionWhenUserIsValid() {
-        User createdUser = userController.create(defaultUser);
-        assertDoesNotThrow(() -> userController.update(createdUser));
-    }
-
-    @Test
-    public void updatedUserShouldThrowExceptionWhenLoginIsEmpty() {
-        User createdUser = userController.create(defaultUser);
-
-        User updatedUserWithEmptyLogin = createdUser.toBuilder()
-                .login("")
+        UserDTO createdUser = userController.create(defaultUser);
+        UserUpdateDTO updatedUser = UserUpdateDTO.builder()
+                .id(createdUser.getId())
+                .email(createdUser.getEmail())
+                .login(createdUser.getLogin())
+                .name(createdUser.getName())
+                .birthday(createdUser.getBirthday())
                 .build();
-
-        assertThrowsExactly(ValidationException.class, () -> userController.update(updatedUserWithEmptyLogin));
-    }
-
-    @Test
-    public void updatedUserShouldThrowExceptionWhenLoginContainsSpaces() {
-        User createdUser = userController.create(defaultUser);
-
-        User updatedUserWithLoginWithSpaces = createdUser.toBuilder()
-                .login("Login With Spaces")
-                .build();
-
-        assertThrowsExactly(ValidationException.class, () -> userController.update(updatedUserWithLoginWithSpaces));
-    }
-
-    @Test
-    public void updateUserShouldThrowExceptionWhenBirthDateIsInFuture() {
-        User createdUser = userController.create(defaultUser);
-
-        User userWithBirthDateInFuture = createdUser.toBuilder()
-                .birthday(LocalDate.now().plusDays(10))
-                .build();
-
-        assertThrowsExactly(ValidationException.class, () -> userController.update(userWithBirthDateInFuture));
+        assertDoesNotThrow(() -> userController.update(updatedUser));
     }
 
     @Test
     public void getAllFilmsShouldReturnAllFilms() {
-        User createdUser = userController.create(defaultUser);
+        UserDTO createdUser = userController.create(defaultUser);
         assertEquals(1, userController.findAll().size(), "Количество добавленных и полученных пользователей должно совпадать");
     }
 
     @Test
     public void updateShouldThrowExceptionIfUpdateOfNonExistingUser() {
         long idOfNonExistingUser = 100500;
-        User nonExistingUser = defaultUser.toBuilder()
+        UserUpdateDTO nonExistingUser = UserUpdateDTO.builder()
                 .id(idOfNonExistingUser)
+                .email(defaultUser.getEmail())
+                .login(defaultUser.getLogin())
+                .name(defaultUser.getName())
+                .birthday(LocalDate.now().plusDays(10))
                 .build();
 
         assertThrowsExactly(NotFoundException.class, () -> userController.update(nonExistingUser));

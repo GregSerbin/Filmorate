@@ -4,10 +4,9 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.UserDTO;
+import ru.yandex.practicum.filmorate.model.UserUpdateDTO;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,10 +15,10 @@ import java.util.Map;
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-    private final Map<Long, User> users = new HashMap<>();
+    private final Map<Long, UserDTO> users = new HashMap<>();
 
     @PostMapping
-    public User create(@Valid @RequestBody User newUser) {
+    public UserDTO create(@Valid @RequestBody UserDTO newUser) {
 
         if (newUser.getName() == null || newUser.getName().isBlank()) {
             newUser.setName(newUser.getLogin());
@@ -36,24 +35,18 @@ public class UserController {
     }
 
     @PutMapping
-    public User update(@RequestBody User newUser) {
-        if (newUser.getId() == null) {
-            log.error("Id должен быть указан");
-            throw new ValidationException("Id должен быть указан");
-        }
+    public UserDTO update(@Valid @RequestBody UserUpdateDTO newUser) {
 
         if (users.containsKey(newUser.getId())) {
-            User oldUser = users.get(newUser.getId());
+            UserDTO oldUser = users.get(newUser.getId());
             log.debug("По id={} найден пользователь {}", newUser.getId(), oldUser);
 
             if (newUser.getEmail() != null) {
-                validateUserEmail(newUser);
                 oldUser.setEmail(newUser.getEmail());
                 log.info("Изменен email на \"{}\"", oldUser.getEmail());
             }
 
             if (newUser.getLogin() != null) {
-                validateUserLogin(newUser);
                 oldUser.setLogin(newUser.getLogin());
                 log.info("Изменен логин на \"{}\"", oldUser.getLogin());
             }
@@ -64,7 +57,6 @@ public class UserController {
             }
 
             if (newUser.getBirthday() != null) {
-                validateUserBirthday(newUser);
                 oldUser.setBirthday(newUser.getBirthday());
                 log.info("Изменен день рождения на \"{}\"", oldUser.getBirthday());
             }
@@ -77,33 +69,8 @@ public class UserController {
     }
 
     @GetMapping
-    public Collection<User> findAll() {
+    public Collection<UserDTO> findAll() {
         return users.values();
-    }
-
-    private void validateUserEmail(User user) {
-        if (user.getEmail() == null ||
-                user.getEmail().isBlank() ||
-                !user.getEmail().contains("@")) {
-            log.error("Электронная почта не может быть пустой и должна содержать символ @");
-            throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
-        }
-    }
-
-    private void validateUserLogin(User user) {
-        if (user.getLogin() == null ||
-                user.getLogin().isBlank() ||
-                user.getLogin().contains(" ")) {
-            log.error("Логин не может быть пустым и содержать пробелы");
-            throw new ValidationException("Логин не может быть пустым и содержать пробелы");
-        }
-    }
-
-    private void validateUserBirthday(User user) {
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.error("Дата рождения не может быть в будущем");
-            throw new ValidationException("Дата рождения не может быть в будущем");
-        }
     }
 
     private long getNextId() {
