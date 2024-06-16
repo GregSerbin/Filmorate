@@ -1,84 +1,66 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.UserDTO;
 import ru.yandex.practicum.filmorate.model.UserUpdateDTO;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 @Slf4j
 public class UserController {
-    private final Map<Long, UserDTO> users = new HashMap<>();
+    private final UserService userService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public UserDTO create(@Valid @RequestBody UserDTO newUser) {
-
-        if (newUser.getName() == null || newUser.getName().isBlank()) {
-            newUser.setName(newUser.getLogin());
-            log.debug("Пользователю {} присвоено имя равное логину {}", newUser, newUser.getLogin());
-        }
-
-        newUser.setId(getNextId());
-        log.debug("Пользователю {} присвоен id={}", newUser, newUser.getId());
-
-        users.put(newUser.getId(), newUser);
-        log.debug("В список пользователей добавлен пользователь {}", newUser);
-
-        return newUser;
+        return userService.create(newUser);
     }
 
     @PutMapping
     public UserDTO update(@Valid @RequestBody UserUpdateDTO newUser) {
-
-        if (users.containsKey(newUser.getId())) {
-            UserDTO oldUser = users.get(newUser.getId());
-            log.debug("По id={} найден пользователь {}", newUser.getId(), oldUser);
-
-            if (newUser.getEmail() != null) {
-                oldUser.setEmail(newUser.getEmail());
-                log.info("Изменен email на \"{}\"", oldUser.getEmail());
-            }
-
-            if (newUser.getLogin() != null) {
-                oldUser.setLogin(newUser.getLogin());
-                log.info("Изменен логин на \"{}\"", oldUser.getLogin());
-            }
-
-            if (newUser.getName() != null) {
-                oldUser.setName(newUser.getName());
-                log.info("Изменено имя на \"{}\"", oldUser.getName());
-            }
-
-            if (newUser.getBirthday() != null) {
-                oldUser.setBirthday(newUser.getBirthday());
-                log.info("Изменен день рождения на \"{}\"", oldUser.getBirthday());
-            }
-
-            return oldUser;
-        }
-
-        log.error("Пользователь с id=" + newUser.getId() + " не найден");
-        throw new NotFoundException("Пользователь с id=" + newUser.getId() + " не найден");
+        return userService.update(newUser);
     }
 
     @GetMapping
     public Collection<UserDTO> findAll() {
-        return users.values();
+        return userService.findAll();
     }
 
-    private long getNextId() {
-        long currentMaxId = users.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @GetMapping("/{id}")
+    public UserDTO getUser(@Valid @PathVariable final Long id) {
+        return userService.getUser(id);
     }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public UserDTO addFriend(@Valid @PathVariable("id") Long id,
+                             @Valid @PathVariable("friendId") Long friendId) {
+        return userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public UserDTO removeFriend(@Valid @PathVariable("id") Long id,
+                                @Valid @PathVariable("friendId") Long friendId) {
+        return userService.removeFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public Collection<UserDTO> getFriends(@Valid @PathVariable("id") Long id) {
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Collection<UserDTO> getFriends(@Valid @PathVariable("id") Long id,
+                                          @Valid @PathVariable("otherId") Long otherId) {
+        return userService.getMutualFriends(id, otherId);
+    }
+
+
 }
