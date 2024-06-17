@@ -2,10 +2,9 @@ package ru.yandex.practicum.filmorate.exception;
 
 import lombok.Getter;
 
+@Getter
 public class ErrorResponse {
-    @Getter
     private final String error;
-    @Getter
     private final String description;
 
     public ErrorResponse(String error, String description) {
