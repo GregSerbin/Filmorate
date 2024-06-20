@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.UserDTO;
 import ru.yandex.practicum.filmorate.model.UserUpdateDTO;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
 
@@ -17,7 +19,7 @@ public class UserControllerTest {
 
     @BeforeEach
     public void beforeEach() {
-        userController = new UserController();
+        userController = new UserController(new UserService(new InMemoryUserStorage()));
         defaultUser = UserDTO.builder()
                 .email("user_email@example.ru")
                 .login("user_login")
