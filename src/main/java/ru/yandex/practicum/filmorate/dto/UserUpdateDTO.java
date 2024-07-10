@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Builder;
@@ -20,7 +20,8 @@ public class UserUpdateDTO {
     @NotBlank(message = "Логин пользователя не может быть пустым")
     private String login;
 
-    @NotBlank(message = "Имя пользователя не может быть пустым") // Если обновляем имя пользователя, то оно не может быть пустым
+    @NotBlank(message = "Имя пользователя не может быть пустым")
+    // Если обновляем имя пользователя, то оно не может быть пустым
     private String name;
 
     @Past(message = "Дата рождения не может быть в будущем")

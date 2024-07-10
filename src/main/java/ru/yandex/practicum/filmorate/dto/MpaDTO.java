@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -11,9 +11,10 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Mpa {
+public class MpaDTO {
     @NotNull
     private Integer id;
-    @NotBlank
+
+    @NotBlank(message = "Название рейтинга не может быть пустым")
     private String name;
 }
