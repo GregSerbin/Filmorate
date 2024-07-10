@@ -22,26 +22,26 @@ public class UserRepository extends BaseRepository {
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<User> mapper;
 
-    private final String ADD_USER_QUERY = "INSERT INTO users(email, login, name, birthday) VALUES (?, ?, ?, ?)";
-    private final String UPDATE_USER_QUERY = "UPDATE users " +
+    private static final String ADD_USER_QUERY = "INSERT INTO users(email, login, name, birthday) VALUES (?, ?, ?, ?)";
+    private static final String UPDATE_USER_QUERY = "UPDATE users " +
             "SET email = ?, login = ?, name = ?, birthday = ? " +
             "WHERE user_id = ?";
-    private final String FIND_USER_BY_ID_QUERY = "SELECT * " +
+    private static final String FIND_USER_BY_ID_QUERY = "SELECT * " +
             "FROM users " +
             "WHERE user_id = ?";
-    private final String FIND_ALL_USERS_QUERY = "SELECT * FROM users";
-    private final String CHECK_USER_AVAILABILITY_QUERY = "SELECT COUNT(user_id) " +
+    private static final String FIND_ALL_USERS_QUERY = "SELECT * FROM users";
+    private static final String CHECK_USER_AVAILABILITY_QUERY = "SELECT COUNT(user_id) " +
             "FROM friends " +
             "WHERE user_id = ? AND friend_id = ?";
-    private final String UPDATE_FRIENDSHIP_CONFIRMATION_QUERY = "UPDATE friends " +
+    private static final String UPDATE_FRIENDSHIP_CONFIRMATION_QUERY = "UPDATE friends " +
             "SET friendship_status = true " +
             "WHERE user_id = ? AND friend_id = ?";
-    private final String ADD_FRIEND_QUERY = "INSERT INTO friends(user_id, " +
+    private static final String ADD_FRIEND_QUERY = "INSERT INTO friends(user_id, " +
             "friend_id, friendship_status) VALUES (?, ?, false)";
-    private final String REMOVE_FRIEND_QUERY = "DELETE FROM friends " +
+    private static final String REMOVE_FRIEND_QUERY = "DELETE FROM friends " +
             "WHERE user_id = ? AND friend_id = ?";
-    private final String CHECK_USER_BY_ID_QUERY = "SELECT COUNT(user_id) FROM users WHERE user_id = ?";
-    private final String GET_FRIENDS_BY_ID_QUERY = "SELECT user_id " +
+    private static final String CHECK_USER_BY_ID_QUERY = "SELECT COUNT(user_id) FROM users WHERE user_id = ?";
+    private static final String GET_FRIENDS_BY_ID_QUERY = "SELECT user_id " +
             "FROM friends " +
             "WHERE friend_id = ? " +
             "UNION " +

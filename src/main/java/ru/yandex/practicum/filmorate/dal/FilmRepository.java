@@ -23,26 +23,26 @@ public class FilmRepository extends BaseRepository {
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<Film> mapper;
 
-    private final String ADD_FILM_QUERY = "INSERT INTO films(name, description, release_date, duration, mpa_id) VALUES (?, ?, ?, ?, ?)";
-    private final String ADD_FILM_GENRES_QUERY = "MERGE INTO films_genre(film_id, genre_id) KEY(film_id, genre_id) VALUES (?, ?)";
-    private final String UPDATE_FILM_QUERY = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? WHERE film_id = ?";
-    private final String DELETE_FILM_QUERY = "DELETE FROM films WHERE film_id = ?";
-    private final String GET_ALL_FILMS_QUERY = "SELECT f.FILM_ID , f.NAME , f.DESCRIPTION , f.RELEASE_DATE , " +
+    private static final String ADD_FILM_QUERY = "INSERT INTO films(name, description, release_date, duration, mpa_id) VALUES (?, ?, ?, ?, ?)";
+    private static final String ADD_FILM_GENRES_QUERY = "MERGE INTO films_genre(film_id, genre_id) KEY(film_id, genre_id) VALUES (?, ?)";
+    private static final String UPDATE_FILM_QUERY = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? WHERE film_id = ?";
+    private static final String DELETE_FILM_QUERY = "DELETE FROM films WHERE film_id = ?";
+    private static final String GET_ALL_FILMS_QUERY = "SELECT f.FILM_ID , f.NAME , f.DESCRIPTION , f.RELEASE_DATE , " +
             "f.DURATION , f.MPA_ID , m.NAME AS mpa_name, fg.GENRE_ID , g.NAME AS genre_name " +
             "FROM FILMS f " +
             "LEFT JOIN MPA m ON f.MPA_ID = m.MPA_ID " +
             "LEFT JOIN FILMS_GENRE fg ON f.FILM_ID = fg.FILM_ID " +
             "LEFT JOIN GENRES g ON fg.GENRE_ID = g.GENRE_ID ";
-    private final String GET_FILM_BY_ID_QUERY = "SELECT f.film_id, f.name, f.description, f.release_date, f.duration, m.mpa_id, m.name AS mpa_name " +
+    private static final String GET_FILM_BY_ID_QUERY = "SELECT f.film_id, f.name, f.description, f.release_date, f.duration, m.mpa_id, m.name AS mpa_name " +
             "FROM films AS f " +
             "INNER JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
             "WHERE f.film_id = ?";
-    private final String CHECK_FILM_QUERY = "SELECT COUNT(user_id) " +
+    private static final String CHECK_FILM_QUERY = "SELECT COUNT(user_id) " +
             "FROM likes " +
             "WHERE film_id = ? AND user_id = ?";
-    private final String ADD_LIKE_QUERY = "INSERT INTO likes(film_id, user_id) VALUES (?, ?)";
-    private final String REMOVE_LIKE_QUERY = "DELETE FROM likes WHERE user_id = ?";
-    private final String FIND_POPULAR_FILM_QUERY = "SELECT film_id " +
+    private static final String ADD_LIKE_QUERY = "INSERT INTO likes(film_id, user_id) VALUES (?, ?)";
+    private static final String REMOVE_LIKE_QUERY = "DELETE FROM likes WHERE user_id = ?";
+    private static final String FIND_POPULAR_FILM_QUERY = "SELECT film_id " +
             "FROM likes " +
             "GROUP BY film_id " +
             "ORDER BY COUNT(user_id) DESC " +

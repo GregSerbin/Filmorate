@@ -20,13 +20,13 @@ public class GenreRepository {
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<Genre> mapper;
 
-    private final String GET_ALL_GENRES_QUERY = "SELECT * FROM genres";
-    private final String GET_GENRE_BY_ID_QUERY = "SELECT * FROM genres WHERE genre_id = ?";
-    private final String GET_FILM_GENRES_QUERY = "SELECT * " +
+    private static final String GET_ALL_GENRES_QUERY = "SELECT * FROM genres";
+    private static final String GET_GENRE_BY_ID_QUERY = "SELECT * FROM genres WHERE genre_id = ?";
+    private static final String GET_FILM_GENRES_QUERY = "SELECT * " +
             "FROM films_genre fg " +
             "INNER JOIN genres g ON fg.genre_id = g.genre_id " +
             "WHERE fg.film_id = ?";
-    private final String CHECK_IF_GENRE_EXISTS_QUERY = "SELECT COUNT(genre_id) FROM genres WHERE genre_id = ?";
+    private static final String CHECK_IF_GENRE_EXISTS_QUERY = "SELECT COUNT(genre_id) FROM genres WHERE genre_id = ?";
 
 
     public List<Genre> getAllGenres() {

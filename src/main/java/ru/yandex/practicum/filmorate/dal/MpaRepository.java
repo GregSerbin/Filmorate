@@ -20,9 +20,9 @@ public class MpaRepository {
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<Mpa> mapper;
 
-    private final String GET_ALL_MPA_RATINGS_QUERY = "SELECT * FROM mpa";
-    private final String GET_MPA_RATING_BY_ID_QUERY = "SELECT * FROM mpa WHERE mpa_id = ?";
-    private final String CHECK_MPA_RATING_QUERY = "SELECT COUNT(mpa_id) FROM mpa WHERE mpa_id = ?";
+    private static final String GET_ALL_MPA_RATINGS_QUERY = "SELECT * FROM mpa";
+    private static final String GET_MPA_RATING_BY_ID_QUERY = "SELECT * FROM mpa WHERE mpa_id = ?";
+    private static final String CHECK_MPA_RATING_QUERY = "SELECT COUNT(mpa_id) FROM mpa WHERE mpa_id = ?";
 
     public List<Mpa> getAllMpaRatings() {
         log.info("Получен запрос на получение всех рейтингов mpa");
