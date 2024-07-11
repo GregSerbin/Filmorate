@@ -6,18 +6,19 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dal.UserRepository;
 import ru.yandex.practicum.filmorate.dto.UserDTO;
 import ru.yandex.practicum.filmorate.dto.UserUpdateDTO;
+import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class UserService {
-//    private final UserStorage userStorage;
 
     private final UserRepository userRepository;
 
@@ -27,15 +28,25 @@ public class UserService {
             log.info("Пользователю {} присвоено имя, равное логину {}", newUser, newUser.getLogin());
         }
 
-        User user = userRepository.create(UserMapper.mapToUser(newUser));
-        log.info("В список пользователей добавлен пользователь {}", user);
-        return UserMapper.mapToUserDto(user);
+        Long userId = userRepository.create(UserMapper.mapToUser(newUser));
+        if (userId == null) {
+            throw new InternalServerException("Не удалось добавить в БД пользователя " + userId);
+        }
+
+        User addedUser = userRepository.getUserById(userId).get();
+        log.info("В БД добавлен пользователь {}", addedUser);
+        return UserMapper.mapToUserDto(addedUser);
     }
 
-    public UserUpdateDTO update(UserUpdateDTO newUser) {
-        UserUpdateDTO user = userRepository.update(newUser);
+    public UserDTO update(UserUpdateDTO newUser) {
+        int rowsUpdated = userRepository.update(newUser);
+        if (rowsUpdated == 0) {
+            throw new NotFoundException("Пользователя с id=" + newUser.getId() + " не существует");
+        }
+
+        User user = userRepository.getUserById(newUser.getId()).get();
         log.info("Обновлен пользователь {}", user);
-        return user;
+        return UserMapper.mapToUserDto(user);
     }
 
     public List<UserDTO> findAll() {
@@ -46,10 +57,13 @@ public class UserService {
                 .toList();
     }
 
-    public UserDTO getUserById(long id) {
-        log.info("Получен запрос на получение пользователя по id={}", id);
-        User user = userRepository.getUserById(id);
-        return UserMapper.mapToUserDto(user);
+    public UserDTO getUserById(long userId) {
+        log.info("Получен запрос на получение пользователя по id={}", userId);
+        Optional<User> userOptional = userRepository.getUserById(userId);
+        if (userOptional.isEmpty()) {
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
+        }
+        return UserMapper.mapToUserDto(userOptional.get());
     }
 
     public UserDTO addFriend(long userId, long friendId) {
@@ -58,9 +72,33 @@ public class UserService {
             throw new ValidationException("Нельзя добавить самого себя в друзья.");
         }
 
+        checkUserById(userId);
+        checkUserById(friendId);
+
         User user = userRepository.addFriend(userId, friendId);
-        log.info("Заявка успешно отправлена");
+        log.info("Заявка на дружбу успешно отправлена");
+
+        updateFriendshipStatus(userId, friendId);
+
         return UserMapper.mapToUserDto(user);
+    }
+
+    public void updateFriendshipStatus(long userId, long friendId) {
+        int numberOfFirstFriendshipQueries = userRepository.getNumberOfFriendshipQueries(userId, friendId);
+        int numberOfSecondFriendshipQueries = userRepository.getNumberOfFriendshipQueries(friendId, userId);
+
+        // Если у обоих есть записи о дружбе, то обновляем статус дружбы у обоих друзей
+        if (numberOfFirstFriendshipQueries == 1 && numberOfSecondFriendshipQueries == 1) {
+            int rowsUpdated = userRepository.updateFriendship(userId, friendId);
+            if (rowsUpdated != 1) {
+                throw new InternalServerException("Не удалось обновить статус дружбы между пользователями с id=" + userId + " и id=" + friendId);
+            }
+
+            rowsUpdated = userRepository.updateFriendship(friendId, userId);
+            if (rowsUpdated != 1) {
+                throw new InternalServerException("Не удалось обновить статус дружбы между пользователями с id=" + friendId + " и id=" + userId);
+            }
+        }
     }
 
     public UserDTO removeFriend(long userId, long friendId) {
@@ -69,12 +107,18 @@ public class UserService {
             throw new ValidationException("Вы не можете удалить самого себя из друзей.");
         }
 
-        User user = userRepository.deleteFriend(userId, friendId);
+        checkUserById(userId);
+        checkUserById(friendId);
+
+        User user = userRepository.removeFriend(userId, friendId);
         return UserMapper.mapToUserDto(user);
     }
 
     public List<UserDTO> getFriendsById(long userId) {
         log.info("Получен запрос на получение друзей пользователя с id={}", userId);
+
+        checkUserById(userId);
+
         List<User> friends = userRepository.getFriendsById(userId);
         log.info("Список всех друзей получен");
         return friends.stream()
@@ -83,7 +127,7 @@ public class UserService {
     }
 
     public List<UserDTO> getMutualFriends(long userId, long friendId) {
-        log.info("Получен запрос на получение друзей пользователя с id={}", userId);
+        log.info("Получен запрос на получение общих друзей пользователей с id={} и id={}", userId, friendId);
 
         if (userId == friendId) {
             throw new ValidationException("Нельзя искать общих друзей с самим собой.");
@@ -111,6 +155,14 @@ public class UserService {
         return mutualFriends.stream()
                 .map(UserMapper::mapToUserDto)
                 .toList();
+    }
+
+    private void checkUserById(long userId) {
+        log.info("Получен запрос на проверку наличия пользователя с id={}", userId);
+        Optional<User> userOptional = userRepository.getUserById(userId);
+        if (userOptional.isEmpty()) {
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
+        }
     }
 
 }

@@ -26,7 +26,7 @@ public class UserController {
     }
 
     @PutMapping
-    public UserUpdateDTO update(@Valid @RequestBody UserUpdateDTO newUser) {
+    public UserDTO update(@Valid @RequestBody UserUpdateDTO newUser) {
         log.info("Получен запрос на обновление пользователя: {}", newUser);
         return userService.update(newUser);
     }

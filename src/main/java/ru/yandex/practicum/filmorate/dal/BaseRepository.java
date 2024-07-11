@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.dal;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
-import ru.yandex.practicum.filmorate.exception.InternalServerException;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -20,12 +19,7 @@ public class BaseRepository {
             return ps;
         }, keyHolder);
 
-        Long id = keyHolder.getKeyAs(Long.class);
+        return keyHolder.getKeyAs(Long.class);
 
-        if (id != null) {
-            return id;
-        } else {
-            throw new InternalServerException("Не удалось добавить в БД запись");
-        }
     }
 }

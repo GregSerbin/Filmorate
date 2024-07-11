@@ -82,4 +82,22 @@ public class FilmMapper {
         log.info("Преобразование Film в FilmDTO успешно завершено");
         return filmDto;
     }
+
+    public FilmDTO mapToFilmDto(FilmUpdateDTO filmUpdateDTO) {
+        log.info("Начало преобразования FilmUpdateDTO в FilmDTO");
+        List<GenreDTO> genres = filmUpdateDTO.getGenres();
+
+        FilmDTO filmDto = FilmDTO.builder()
+                .id(filmUpdateDTO.getId())
+                .name(filmUpdateDTO.getName())
+                .description(filmUpdateDTO.getDescription())
+                .releaseDate(filmUpdateDTO.getReleaseDate())
+                .duration(filmUpdateDTO.getDuration())
+                .genres(genres)
+                .mpa(filmUpdateDTO.getMpa())
+                .build();
+        log.info("Преобразование FilmUpdateDTO в FilmDTO успешно завершено");
+        return filmDto;
+    }
+
 }

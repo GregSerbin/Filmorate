@@ -5,10 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dal.GenreRepository;
 import ru.yandex.practicum.filmorate.dto.GenreDTO;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.GenreMapper;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -26,7 +28,11 @@ public class GenreService {
 
     public GenreDTO getGenreById(int id) {
         log.info("Получен запрос на получение жанра с id={}", id);
-        Genre genre = genreRepository.getGenreById(id);
-        return GenreMapper.mapToGenreDto(genre);
+        Optional<Genre> genreOptional = genreRepository.getGenreById(id);
+        if (genreOptional.isEmpty()) {
+            throw new NotFoundException("Жанр с id=" + id + " не найден");
+        }
+        return GenreMapper.mapToGenreDto(genreOptional.get());
     }
+
 }

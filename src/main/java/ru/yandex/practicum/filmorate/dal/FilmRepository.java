@@ -5,14 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.InternalServerException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -37,20 +33,17 @@ public class FilmRepository extends BaseRepository {
             "FROM films AS f " +
             "INNER JOIN mpa AS m ON f.mpa_id = m.mpa_id " +
             "WHERE f.film_id = ?";
-    private static final String CHECK_FILM_QUERY = "SELECT COUNT(user_id) " +
-            "FROM likes " +
-            "WHERE film_id = ? AND user_id = ?";
-    private static final String ADD_LIKE_QUERY = "INSERT INTO likes(film_id, user_id) VALUES (?, ?)";
-    private static final String REMOVE_LIKE_QUERY = "DELETE FROM likes WHERE user_id = ?";
+    private static final String ADD_LIKE_QUERY = "MERGE INTO likes(film_id, user_id) KEY(film_id, user_id) VALUES (?, ?)";
+    private static final String REMOVE_LIKE_QUERY = "DELETE FROM likes WHERE film_id = ? AND user_id = ?";
     private static final String FIND_POPULAR_FILM_QUERY = "SELECT film_id " +
             "FROM likes " +
             "GROUP BY film_id " +
             "ORDER BY COUNT(user_id) DESC " +
             "LIMIT ?";
 
-    public Film create(Film film) {
+    public Long create(Film film) {
         log.info("Получен запрос на добавление фильма {}", film);
-        long id = BaseRepository.insert(
+        return BaseRepository.insert(
                 jdbcTemplate,
                 ADD_FILM_QUERY,
                 film.getName(),
@@ -59,26 +52,16 @@ public class FilmRepository extends BaseRepository {
                 film.getDuration(),
                 film.getMpa().getId()
         );
-
-        film.setId(id);
-        log.info("В базу данных добавлен фильм {}", film);
-
-        if (film.getGenres() != null) {
-            for (Genre genre : film.getGenres()) {
-                jdbcTemplate.update(
-                        ADD_FILM_GENRES_QUERY,
-                        film.getId(),
-                        genre.getId()
-                );
-                log.info("Для фильма с id={} добавлен жанр {}", film.getId(), genre);
-            }
-        }
-        return film;
     }
 
-    public Film update(Film film) {
+    public int addGenreToFilm(long filmId, int genreId) {
+        log.info("Получен запрос на добавление жанра с id={}", filmId);
+        return jdbcTemplate.update(ADD_FILM_GENRES_QUERY, filmId, genreId);
+    }
+
+    public int update(Film film) {
         log.info("Получен запрос на обновление фильма {}", film);
-        int rowsUpdated = jdbcTemplate.update(
+        return jdbcTemplate.update(
                 UPDATE_FILM_QUERY,
                 film.getName(),
                 film.getDescription(),
@@ -87,18 +70,11 @@ public class FilmRepository extends BaseRepository {
                 film.getMpa().getId(),
                 film.getId()
         );
-
-        if (rowsUpdated == 0) {
-            throw new NotFoundException("Такого фильма нет");
-        }
-
-        log.info("В базе данных обновлен фильм {}", film);
-        return film;
     }
 
     public void remove(Long id) {
         log.info("Получен запрос на удаление фильма c id={}", id);
-        int rowsUpdated = jdbcTemplate.update(
+        jdbcTemplate.update(
                 DELETE_FILM_QUERY,
                 id
         );
@@ -117,35 +93,13 @@ public class FilmRepository extends BaseRepository {
 
     public Film addLike(long filmId, long userId) {
         log.info("Дабавление лайка фильму с id={} от пользователя c id={}", filmId, userId);
-        Optional<Integer> count = Optional.ofNullable(jdbcTemplate.queryForObject(CHECK_FILM_QUERY, Integer.class, filmId, userId));
-
-        if (count.isEmpty()) {
-            throw new InternalServerException("Не удалось поставить лайк");
-        }
-
-        if (count.get() > 0) {
-            throw new InternalServerException("Данный пользователь уже поставил лайк");
-        }
-
-        log.info("Отправка запроса на добавление лайка фильму с id={} от пользователя c id={}", filmId, userId);
-        int rowsCreated = jdbcTemplate.update(ADD_LIKE_QUERY, filmId, userId);
-
-        if (rowsCreated == 0) {
-            throw new InternalServerException("Не удалось поставить лайк");
-        }
-
+        jdbcTemplate.update(ADD_LIKE_QUERY, filmId, userId);
         return getFilmById(filmId);
     }
 
-    public Film removeLike(long filmId, long userId) {
+    public int removeLike(long filmId, long userId) {
         log.info("Отправка запроса на удаление лайка фильму с id={} от пользователя c id={}");
-        int rowsDeleted = jdbcTemplate.update(REMOVE_LIKE_QUERY, userId);
-
-        if (rowsDeleted == 0) {
-            throw new InternalServerException("Данный пользователь лайк не ставил");
-        }
-
-        return getFilmById(filmId);
+        return jdbcTemplate.update(REMOVE_LIKE_QUERY, filmId, userId);
     }
 
     public List<Film> findPopularFilms(int count) {

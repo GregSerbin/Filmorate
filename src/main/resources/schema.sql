@@ -48,5 +48,6 @@ CREATE TABLE IF NOT EXISTS friends(
 
 CREATE TABLE IF NOT EXISTS likes(
 	film_id bigint REFERENCES films(film_id) ON UPDATE RESTRICT ON DELETE CASCADE,
-	user_id bigint REFERENCES users(user_id) ON UPDATE RESTRICT ON DELETE CASCADE
+	user_id bigint REFERENCES users(user_id) ON UPDATE RESTRICT ON DELETE CASCADE,
+	CONSTRAINT uq_likes UNIQUE(film_id, user_id)
 );
