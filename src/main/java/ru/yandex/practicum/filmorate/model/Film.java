@@ -4,32 +4,42 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.yandex.practicum.filmorate.annotation.ReleaseDate;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
-public class FilmDTO {
+@NoArgsConstructor
+@AllArgsConstructor
+public class Film {
 
     private Long id;
 
-    @NotNull(message = "Название фильма не может быть пустым")
     @NotBlank(message = "Название фильма не может быть пустым")
     private String name;
 
-    @NotNull(message = "Описание фильма не может быть пустым")
     @NotBlank(message = "Описание фильма не может быть пустым")
     @Size(message = "Описание фильма не может превышать 200 символов", max = 200)
     private String description;
 
-    @NotNull(message = "Дата релиза фильма не может быть пустой")
-    @ReleaseDate(message = "Дата релиза фильма должна быть не ранее 28 декабря 1895 года")
+    @ReleaseDate(value = "1895-12-28", message = "Дата релиза фильма должна быть не ранее 28 декабря 1895 года")
     private LocalDate releaseDate;
 
     @NotNull(message = "Продолжительность фильма не может быть пустой")
     @Positive(message = "Продолжительность фильма должна быть положительным числом")
     private Integer duration;
+
+    @NotNull(message = "Рейтинг фильма не может быть пустым")
+    private Mpa mpa;
+
+    private List<Genre> genres = new ArrayList<>();
+
 }
+

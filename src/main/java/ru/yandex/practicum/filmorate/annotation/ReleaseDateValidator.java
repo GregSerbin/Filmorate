@@ -6,15 +6,16 @@ import jakarta.validation.ConstraintValidatorContext;
 import java.time.LocalDate;
 
 public class ReleaseDateValidator implements ConstraintValidator<ReleaseDate, LocalDate> {
-    private static final LocalDate DATE_OF_RELEASE = LocalDate.of(1895, 12, 28);
+
+    private LocalDate minDate;
 
     @Override
     public boolean isValid(LocalDate localDate, ConstraintValidatorContext constraintValidatorContext) {
-        return localDate.isAfter(DATE_OF_RELEASE);
+        return !localDate.isBefore(minDate);
     }
 
     @Override
     public void initialize(ReleaseDate constraintAnnotation) {
-        ConstraintValidator.super.initialize(constraintAnnotation);
+        this.minDate = LocalDate.parse(constraintAnnotation.value());
     }
 }

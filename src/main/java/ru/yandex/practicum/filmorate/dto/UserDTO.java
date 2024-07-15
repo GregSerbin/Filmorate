@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -16,11 +16,9 @@ public class UserDTO {
     private Long id;
 
     @Email(message = "email должен соответствовать формату")
-    @NotNull(message = "email пользователя не может быть пустым")
     @NotBlank(message = "email пользователя не может быть пустым")
     private String email;
 
-    @NotNull(message = "Логин пользователя не может быть пустым")
     @NotBlank(message = "Логин пользователя не может быть пустым")
     private String login;
     private String name;
